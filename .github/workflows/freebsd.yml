@@ -1,0 +1,28 @@
+name: FreeBSD
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+
+jobs:
+  freebsd:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        prepare: |
+          pkg install -y curl
+          pw user add -n testing -m
+        run: |
+          su testing -c '
+            curl -sSf https://sh.rustup.rs | sh /dev/stdin -y \
+              && ~/.cargo/bin/cargo test --all-features --all-targets \
+              && ~/.cargo/bin/cargo clean
+          '
+
